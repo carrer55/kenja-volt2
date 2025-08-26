@@ -118,15 +118,15 @@ function ConnectionTest() {
             {connectionStatus === 'success' && (
               <div className="text-slate-600 text-sm">
                 <p className="mb-4">
-                  Supabaseとの接続が確認できました。次にデータベース設計を行います。
+                  Supabaseとの接続が確認できました。organizationsテーブルが正常に作成されています。
                 </p>
                 <div className="bg-white/30 rounded-lg p-4">
-                  <h3 className="font-semibold text-slate-800 mb-2">次のステップ</h3>
+                  <h3 className="font-semibold text-slate-800 mb-2">データベース構築状況</h3>
                   <ul className="text-left space-y-1 text-xs">
-                    <li>• ユーザー認証テーブルの設計</li>
-                    <li>• プロフィール情報テーブルの設計</li>
-                    <li>• Row Level Security (RLS) の設定</li>
-                    <li>• 認証フローの実装</li>
+                    <li>✅ organizationsテーブル作成完了</li>
+                    <li>⏳ usersテーブル作成待ち</li>
+                    <li>⏳ applicationsテーブル作成待ち</li>
+                    <li>⏳ Row Level Security (RLS) 設定待ち</li>
                   </ul>
                 </div>
               </div>
@@ -142,7 +142,7 @@ function ConnectionTest() {
                     <li>• Project URLが正しいか確認</li>
                     <li>• API Keyが正しいか確認</li>
                     <li>• Supabaseプロジェクトが有効か確認</li>
-                    <li>• ネットワーク接続を確認</li>
+                    <li>• organizationsテーブルが作成されているか確認</li>
                   </ul>
                 </div>
               </div>

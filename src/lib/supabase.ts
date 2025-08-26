@@ -9,223 +9,41 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Database types
-export interface Database {
-  public: {
-    Tables: {
-      organizations: {
-        Row: {
-          id: string;
-          name: string;
-          plan_type: 'free' | 'pro' | 'enterprise';
-          user_limit: number;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          plan_type: 'free' | 'pro' | 'enterprise';
-          user_limit?: number;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          plan_type?: 'free' | 'pro' | 'enterprise';
-          user_limit?: number;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      users: {
-        Row: {
-          id: string;
-          organization_id: string;
-          auth_user_id: string;
-          full_name: string;
-          email: string;
-          phone: string | null;
-          position: '代表取締役' | '取締役' | '部長' | '課長' | '主任' | '一般職' | null;
-          department: string | null;
-          role: 'admin' | 'approver' | 'user';
-          status: 'active' | 'inactive' | 'invited';
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          organization_id: string;
-          auth_user_id: string;
-          full_name: string;
-          email: string;
-          phone?: string | null;
-          position?: '代表取締役' | '取締役' | '部長' | '課長' | '主任' | '一般職' | null;
-          department?: string | null;
-          role: 'admin' | 'approver' | 'user';
-          status?: 'active' | 'inactive' | 'invited';
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          organization_id?: string;
-          auth_user_id?: string;
-          full_name?: string;
-          email?: string;
-          phone?: string | null;
-          position?: '代表取締役' | '取締役' | '部長' | '課長' | '主任' | '一般職' | null;
-          department?: string | null;
-          role?: 'admin' | 'approver' | 'user';
-          status?: 'active' | 'inactive' | 'invited';
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      applications: {
-        Row: {
-          id: string;
-          organization_id: string;
-          applicant_id: string;
-          type: 'business_trip' | 'expense';
-          title: string;
-          purpose: string | null;
-          status: 'draft' | 'pending' | 'approved' | 'rejected' | 'returned';
-          estimated_amount: number;
-          actual_amount: number;
-          start_date: string | null;
-          end_date: string | null;
-          destination: string | null;
-          details: any;
-          attachments: any;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          organization_id: string;
-          applicant_id: string;
-          type: 'business_trip' | 'expense';
-          title: string;
-          purpose?: string | null;
-          status?: 'draft' | 'pending' | 'approved' | 'rejected' | 'returned';
-          estimated_amount?: number;
-          actual_amount?: number;
-          start_date?: string | null;
-          end_date?: string | null;
-          destination?: string | null;
-          details?: any;
-          attachments?: any;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          organization_id?: string;
-          applicant_id?: string;
-          type?: 'business_trip' | 'expense';
-          title?: string;
-          purpose?: string | null;
-          status?: 'draft' | 'pending' | 'approved' | 'rejected' | 'returned';
-          estimated_amount?: number;
-          actual_amount?: number;
-          start_date?: string | null;
-          end_date?: string | null;
-          destination?: string | null;
-          details?: any;
-          attachments?: any;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      allowance_settings: {
-        Row: {
-          id: string;
-          organization_id: string;
-          position: string;
-          domestic_daily: number;
-          domestic_accommodation: number;
-          overseas_daily: number;
-          overseas_accommodation: number;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          organization_id: string;
-          position: string;
-          domestic_daily?: number;
-          domestic_accommodation?: number;
-          overseas_daily?: number;
-          overseas_accommodation?: number;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          organization_id?: string;
-          position?: string;
-          domestic_daily?: number;
-          domestic_accommodation?: number;
-          overseas_daily?: number;
-          overseas_accommodation?: number;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      notifications: {
-        Row: {
-          id: string;
-          user_id: string;
-          title: string;
-          message: string;
-          type: 'approval_request' | 'status_update' | 'system';
-          read: boolean;
-          related_application_id: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          title: string;
-          message: string;
-          type: 'approval_request' | 'status_update' | 'system';
-          read?: boolean;
-          related_application_id?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          title?: string;
-          message?: string;
-          type?: 'approval_request' | 'status_update' | 'system';
-          read?: boolean;
-          related_application_id?: string | null;
-          created_at?: string;
-        };
-      };
-    };
-  };
-}
-
 // 接続テスト関数
 export async function testConnection() {
   try {
-    const { data, error } = await supabase
+    // まず基本的な接続テスト
+    const { data: healthCheck, error: healthError } = await supabase
       .from('organizations')
       .select('count', { count: 'exact', head: true });
+    
+    if (healthError) {
+      console.error('Supabase connection error:', healthError);
+      return { success: false, error: healthError.message };
+    }
+
+    // テーブル構造の確認
+    const { data, error } = await supabase
+      .from('organizations')
+      .select('*')
+      .limit(1);
     
     if (error) {
       console.error('Supabase connection error:', error);
       return { success: false, error: error.message };
     }
     
-    console.log('Supabase connection successful');
-    return { success: true, message: 'Supabase接続成功' };
+    console.log('Supabase connection successful', { tableExists: true, data });
+    return { 
+      success: true, 
+      message: 'Supabase接続成功',
+      details: {
+        tableExists: true,
+        recordCount: data?.length || 0
+      }
+    };
   } catch (error) {
     console.error('Connection test failed:', error);
-    return { success: false, error: 'Connection failed' };
+    return { success: false, error: 'データベース接続に失敗しました' };
   }
 }
