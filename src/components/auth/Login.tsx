@@ -55,14 +55,6 @@ function Login({ onNavigate, onLoginSuccess }: LoginProps) {
                 </div>
               )}
 
-              {/* デモアカウント案内 */}
-              <div className="bg-blue-50/50 border border-blue-200/50 rounded-lg p-4">
-                <h3 className="font-semibold text-blue-800 mb-2">デモアカウント</h3>
-                <p className="text-blue-700 text-sm mb-2">
-                  メールアドレス: <code className="bg-blue-100 px-1 rounded">demo</code><br />
-                  パスワード: <code className="bg-blue-100 px-1 rounded">pass9981</code>
-                </p>
-              </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -71,7 +63,7 @@ function Login({ onNavigate, onLoginSuccess }: LoginProps) {
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                   <input
-                    type="text"
+                    type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 bg-white/50 border border-white/40 rounded-lg text-slate-700 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-navy-400 backdrop-blur-xl"

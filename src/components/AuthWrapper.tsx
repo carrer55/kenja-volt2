@@ -2,23 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import Login from './auth/Login';
 import Register from './auth/Register';
-import RegisterSuccess from './auth/RegisterSuccess';
-import EmailConfirmed from './auth/EmailConfirmed';
-import Onboarding from './auth/Onboarding';
 import PasswordReset from './auth/PasswordReset';
 import Dashboard from './Dashboard';
 
 function AuthWrapper() {
   const [currentView, setCurrentView] = useState<string>('login');
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
 
   const handleLoginSuccess = () => {
     // ログイン成功時の処理は useAuth フックで自動的に処理される
   };
 
-  const handleOnboardingComplete = () => {
-    // オンボーディング完了時の処理も useAuth フックで自動的に処理される
-  };
 
   const navigateToView = (view: string) => {
     setCurrentView(view);
@@ -37,19 +31,13 @@ function AuthWrapper() {
     );
   }
 
-  if (isAuthenticated) {
+  if (isAuthenticated && user) {
     return <Dashboard />;
   }
 
   switch (currentView) {
     case 'register':
       return <Register onNavigate={navigateToView} />;
-    case 'register-success':
-      return <RegisterSuccess onNavigate={navigateToView} />;
-    case 'email-confirmed':
-      return <EmailConfirmed onNavigate={navigateToView} />;
-    case 'onboarding':
-      return <Onboarding onNavigate={navigateToView} onComplete={handleOnboardingComplete} />;
     case 'password-reset':
       return <PasswordReset onNavigate={navigateToView} />;
     default:

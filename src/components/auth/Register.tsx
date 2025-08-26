@@ -36,17 +36,11 @@ function Register({ onNavigate }: RegisterProps) {
       return;
     }
 
-    const result = await registerUser({
-      email: formData.email,
-      password: formData.password,
-      name: formData.name,
-      company: formData.company,
-      position: formData.position,
-      phone: formData.phone
-    });
+    const result = await registerUser(formData);
 
     if (result.success) {
-      onNavigate('register-success');
+      // 登録成功時は直接ダッシュボードに遷移
+      // Supabaseの認証状態変更により自動的にダッシュボードが表示される
     } else {
       setError(result.error || '登録に失敗しました');
     }
