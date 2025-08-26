@@ -12,34 +12,59 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // 接続テスト関数
 export async function testConnection() {
   try {
-    // まず基本的な接続テスト
-    const { data: healthCheck, error: healthError } = await supabase
-      .from('organizations')
-      .select('count', { count: 'exact', head: true });
+    // 段階的なテーブル確認
+    const tableChecks = [];
     
-    if (healthError) {
-      console.error('Supabase connection error:', healthError);
-      return { success: false, error: healthError.message };
+    // organizationsテーブルの確認
+    try {
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .select('*')
+        .limit(1);
+      
+      tableChecks.push({
+        table: 'organizations',
+        exists: !orgError,
+        error: orgError?.message
+      });
+    } catch (err) {
+      tableChecks.push({
+        table: 'organizations',
+        exists: false,
+        error: 'テーブルが存在しません'
+      });
     }
 
-    // テーブル構造の確認
-    const { data, error } = await supabase
-      .from('organizations')
-      .select('*')
-      .limit(1);
-    
-    if (error) {
-      console.error('Supabase connection error:', error);
-      return { success: false, error: error.message };
+    // usersテーブルの確認
+    try {
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .limit(1);
+      
+      tableChecks.push({
+        table: 'users',
+        exists: !userError,
+        error: userError?.message
+      });
+    } catch (err) {
+      tableChecks.push({
+        table: 'users',
+        exists: false,
+        error: 'テーブルが存在しません'
+      });
     }
+
+    const allTablesExist = tableChecks.every(check => check.exists);
     
-    console.log('Supabase connection successful', { tableExists: true, data });
+    console.log('Database structure check:', tableChecks);
+    
     return { 
       success: true, 
-      message: 'Supabase接続成功',
+      message: allTablesExist ? 'データベース構築完了' : 'データベース構築中',
       details: {
-        tableExists: true,
-        recordCount: data?.length || 0
+        tables: tableChecks,
+        allTablesReady: allTablesExist
       }
     };
   } catch (error) {

@@ -5,6 +5,7 @@ import { testConnection } from '../lib/supabase';
 function ConnectionTest() {
   const [connectionStatus, setConnectionStatus] = useState<'testing' | 'success' | 'error'>('testing');
   const [errorMessage, setErrorMessage] = useState('');
+  const [tableStatus, setTableStatus] = useState<any[]>([]);
 
   useEffect(() => {
     const runConnectionTest = async () => {
@@ -14,6 +15,7 @@ function ConnectionTest() {
       
       if (result.success) {
         setConnectionStatus('success');
+        setTableStatus(result.details?.tables || []);
       } else {
         setConnectionStatus('error');
         setErrorMessage(result.error || 'Unknown error');
@@ -90,45 +92,87 @@ function ConnectionTest() {
 
             {/* 接続詳細 */}
             <div className="backdrop-blur-xl bg-white/20 rounded-lg p-6 border border-white/30 mb-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                <div className="flex items-center space-x-3">
-                  <Database className="w-5 h-5 text-slate-500" />
-                  <div>
-                    <p className="text-sm text-slate-600">Project URL</p>
-                    <p className="font-medium text-slate-800 text-xs">tijmpjkcqvxbdygkjxtw.supabase.co</p>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                  <div className="flex items-center space-x-3">
+                    <Database className="w-5 h-5 text-slate-500" />
+                    <div>
+                      <p className="text-sm text-slate-600">Project URL</p>
+                      <p className="font-medium text-slate-800 text-xs">tijmpjkcqvxbdygkjxtw.supabase.co</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Wifi className="w-5 h-5 text-slate-500" />
+                    <div>
+                      <p className="text-sm text-slate-600">接続状態</p>
+                      <p className={`font-medium text-xs ${
+                        connectionStatus === 'success' ? 'text-emerald-600' :
+                        connectionStatus === 'error' ? 'text-red-600' : 'text-blue-600'
+                      }`}>
+                        {connectionStatus === 'success' ? '接続済み' :
+                         connectionStatus === 'error' ? '接続エラー' : '接続中...'}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <Wifi className="w-5 h-5 text-slate-500" />
+                
+                {/* テーブル構築状況 */}
+                {connectionStatus === 'success' && tableStatus.length > 0 && (
                   <div>
-                    <p className="text-sm text-slate-600">接続状態</p>
-                    <p className={`font-medium text-xs ${
-                      connectionStatus === 'success' ? 'text-emerald-600' :
-                      connectionStatus === 'error' ? 'text-red-600' : 'text-blue-600'
-                    }`}>
-                      {connectionStatus === 'success' ? '接続済み' :
-                       connectionStatus === 'error' ? '接続エラー' : '接続中...'}
-                    </p>
+                    <h4 className="font-semibold text-slate-800 mb-3">データベーステーブル状況</h4>
+                    <div className="space-y-2">
+                      {tableStatus.map((table, index) => (
+                        <div key={index} className="flex items-center justify-between bg-white/20 rounded-lg p-3">
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-3 h-3 rounded-full ${table.exists ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
+                            <span className="text-sm font-medium text-slate-700">{table.table}テーブル</span>
+                          </div>
+                          <span className={`text-xs ${table.exists ? 'text-emerald-600' : 'text-red-600'}`}>
+                            {table.exists ? '作成済み' : '未作成'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
 
             {/* 次のステップ */}
             {connectionStatus === 'success' && (
               <div className="text-slate-600 text-sm">
-                <p className="mb-4">
-                  Supabaseとの接続が確認できました。organizationsテーブルが正常に作成されています。
-                </p>
-                <div className="bg-white/30 rounded-lg p-4">
-                  <h3 className="font-semibold text-slate-800 mb-2">データベース構築状況</h3>
-                  <ul className="text-left space-y-1 text-xs">
-                    <li>✅ organizationsテーブル作成完了</li>
-                    <li>⏳ usersテーブル作成待ち</li>
-                    <li>⏳ applicationsテーブル作成待ち</li>
-                    <li>⏳ Row Level Security (RLS) 設定待ち</li>
-                  </ul>
-                </div>
+                {tableStatus.every(t => t.exists) ? (
+                  <div>
+                    <p className="mb-4">
+                      データベースの基本構造が完成しました。次のステップに進むことができます。
+                    </p>
+                    <div className="bg-emerald-50/50 rounded-lg p-4">
+                      <h3 className="font-semibold text-emerald-800 mb-2">✅ 構築完了</h3>
+                      <p className="text-emerald-700 text-xs">
+                        organizationsテーブルとusersテーブルが正常に作成されました
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="mb-4">
+                      Supabaseとの接続が確認できました。データベース構築を段階的に進めています。
+                    </p>
+                    <div className="bg-white/30 rounded-lg p-4">
+                      <h3 className="font-semibold text-slate-800 mb-2">構築進行状況</h3>
+                      <ul className="text-left space-y-1 text-xs">
+                        <li className={tableStatus.find(t => t.table === 'organizations')?.exists ? 'text-emerald-600' : 'text-slate-500'}>
+                          {tableStatus.find(t => t.table === 'organizations')?.exists ? '✅' : '⏳'} organizationsテーブル
+                        </li>
+                        <li className={tableStatus.find(t => t.table === 'users')?.exists ? 'text-emerald-600' : 'text-slate-500'}>
+                          {tableStatus.find(t => t.table === 'users')?.exists ? '✅' : '⏳'} usersテーブル
+                        </li>
+                        <li className="text-slate-500">⏳ applicationsテーブル作成待ち</li>
+                        <li className="text-slate-500">⏳ Row Level Security (RLS) 設定待ち</li>
+                      </ul>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
